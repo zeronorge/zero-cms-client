@@ -60,7 +60,7 @@ wp_reset_vars(array('action'));
 # save form settings if we get the update action
 # we do saving here instead of using options.php because we need to use
 # zero_cms_update_option instead of update option.
-if ($_POST['action'] == 'update') {
+if (isset($_POST['action']) && $_POST['action'] == 'update') {
     $options = array('zero_cms_post_url', 'zero_cms_site_id', 'zero_cms_index_pages',
                      'zero_cms_index_posts', 'zero_cms_delete_page', 'zero_cms_delete_post', 'zero_cms_private_page',
                      'zero_cms_private_post', 'zero_cms_output_info', 'zero_cms_output_pager', 'zero_cms_output_facets',
@@ -90,6 +90,12 @@ if ($_POST['action'] == 'update') {
     <?php
 }
 
+# checks if a postparam isset and has a given valye
+function zero_cms_post_param_has_value($param, $value) {
+	return (isset($_POST[$param]) && $_POST[$param] == $value);
+}
+
+
 # checks if we need to check the checkbox
 function zero_cms_checkCheckbox( $theFieldname ) {
     if ($theFieldname == 'zero_cms_index_all_sites') {
@@ -110,7 +116,7 @@ function zero_cms_checkConnectOption($connectType) {
 }
 
 # check for any POST settings
-if ($_POST['zero_cms_ping']) {
+if (isset($_POST['zero_cms_ping'])) {
     if (zero_cms_get_client(true)) {
 ?>
 <div id="message" class="updated fade"><p><strong><?php _e('Ping Success!', 'zero_cms4wp') ?></strong></p></div>
@@ -120,12 +126,12 @@ if ($_POST['zero_cms_ping']) {
     <div id="message" class="updated fade"><p><strong><?php _e('Ping Failed!', 'zero_cms4wp') ?></strong></p></div>
 <?php
     }
-} else if ($_POST['zero_cms_deleteall']) {
+} else if (isset($_POST['zero_cms_deleteall'])) {
     zero_cms_delete_all();
 ?>
     <div id="message" class="updated fade"><p><strong><?php _e('All Indexed Pages Deleted!', 'zero_cms4wp') ?></strong></p></div>
 <?php
-} else if ($_POST['zero_cms_optimize']) {
+} else if (isset($_POST['zero_cms_optimize'])) {
     zero_cms_optimize();
 ?>
     <div id="message" class="updated fade"><p><strong><?php _e('Index Optimized!', 'zero_cms4wp') ?></strong></p></div>
