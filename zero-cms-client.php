@@ -166,10 +166,19 @@ function zero_cms_build_document( $post_info, $domain = NULL, $path = NULL) {
 
         $doc->setField( 'title', $post_info->post_title );
         $doc->setField( 'body', $post_info->post_content );
-        $pos = strpos($post_info->post_content, '<!--more-->');
-        $doc->setField("description", substr($post_info->post_content, 0, $pos));
+
+        $content = $post_info->post_content;
+		$content = preg_replace("/\[caption.*\[\/caption\]/", '', $content); 	
+
+        $pos = strpos($content, '<!--more-->');
+		$content = substr($content, 0, (($pos) ? $pos : 200));
+		$content = strip_tags($content);
+        $doc->setField("description", $content);
+
+
         $doc->setField( 'numcomments', $numcomments );
-        $doc->setField( 'author', $auth_info->display_name );
+        $doc->setField( 'author', $auth_info->user_login);
+        $doc->setField( 'author_name', $auth_info->display_name);
         $doc->setField( 'author_s', get_author_posts_url($auth_info->ID, $auth_info->user_nicename));
         $doc->setField( 'type', $post_info->post_type );
         $doc->setField( 'dateCreated', zero_cms_format_date($post_info->post_date_gmt) );
@@ -967,6 +976,7 @@ function zero_cms_options_init() {
     if (isset($_REQUEST['debug']) && $_REQUEST['debug'] == 'zero_cms_load_all_posts') {
 $prev = 0;
 		zero_cms_load_all_pages($prev);
+		zero_cms_load_all_posts($prev);
 exit;
 	}
     register_setting( 'zero_cms-options-group', 'zero_cms_post_url', 'wp_filter_nohtml_kses' );
