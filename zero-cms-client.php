@@ -166,10 +166,19 @@ function zero_cms_build_document( $post_info, $domain = NULL, $path = NULL) {
 
         $doc->setField( 'title', $post_info->post_title );
         $doc->setField( 'body', $post_info->post_content );
-        $pos = strpos($post_info->post_content, '<!--more-->');
-        $doc->setField("description", substr($post_info->post_content, 0, $pos));
+
+        $content = $post_info->post_content;
+		$content = preg_replace("/\[caption.*\[\/caption\]/", '', $content); 	
+
+        $pos = strpos($content, '<!--more-->');
+		$content = substr($content, 0, (($pos) ? $pos : 200));
+		$content = strip_tags($content);
+        $doc->setField("description", $content);
+
+
         $doc->setField( 'numcomments', $numcomments );
-        $doc->setField( 'author', $auth_info->display_name );
+        $doc->setField( 'author', $auth_info->user_login);
+        $doc->setField( 'author_name', $auth_info->display_name);
         $doc->setField( 'author_s', get_author_posts_url($auth_info->ID, $auth_info->user_nicename));
         $doc->setField( 'type', $post_info->post_type );
         $doc->setField( 'dateCreated', zero_cms_format_date($post_info->post_date_gmt) );
@@ -230,19 +239,18 @@ function zero_cms_format_date( $thedate ) {
 }
 
 function zero_cms_post( $documents, $commit = TRUE, $optimize = FALSE) { 
-    var_dump($documents);
     try {
         $client = zero_cms_get_client();
         if ( ! $client == NULL ) {
             if ($documents) {
                 foreach ($documents as $document) {
-                    $client->add( $document );
+                    $r = $client->add( $document );
                 }
             }
         } else {
             error_log("GOT null for zero_cms_client!");
         }
-    } catch ( Exception $e ) {
+    } catch ( \Exception $e ) {
         error_log("Exception: " . $e->getMessage() ."\n". $e->getTraceAsString());
         echo $e->getMessage();
     }
@@ -950,7 +958,7 @@ function zero_cms_query( $qry, $offset, $count, $fq, $sortby) {
 
 function zero_cms_options_init() {
     
-    $method = $_POST['method'];
+    $method = (isset($_POST['method']) ?  $_POST['method'] : NULL  ) ;
     if ($method === "load") {
         $type = $_POST['type'];
         $prev = $_POST['prev'];
@@ -965,7 +973,12 @@ function zero_cms_options_init() {
             return;
         }
     }
-    
+    if (isset($_REQUEST['debug']) && $_REQUEST['debug'] == 'zero_cms_load_all_posts') {
+$prev = 0;
+		zero_cms_load_all_pages($prev);
+		zero_cms_load_all_posts($prev);
+exit;
+	}
     register_setting( 'zero_cms-options-group', 'zero_cms_post_url', 'wp_filter_nohtml_kses' );
     register_setting( 'zero_cms-options-group', 'zero_cms_site_id', 'wp_filter_nohtml_kses' );
     register_setting( 'zero_cms-options-group', 'zero_cms_index_pages', 'absint' );
@@ -1046,7 +1059,7 @@ function zero_cms_add_pages() {
     
     if ($addpage) {
         
-        add_options_page('ZeroCMS Options', 'ZeroCMS Options', 8, basename(__DIR__) ."/". basename(__FILE__), 'zero_cms_options_page');
+        add_options_page('ZeroCMS Options', 'ZeroCMS Options', 'edit_pages', basename(__DIR__) ."/". basename(__FILE__), 'zero_cms_options_page');
     }
 }
 
@@ -1084,6 +1097,7 @@ function zero_cms_admin_head() {
     
     function handleResults(data) {
         $j('#percentspan').text(data.percent + "%");
+return;
         if (!data.end) {
             doLoad(data.type, data.last);
         } else {
@@ -1114,7 +1128,9 @@ function zero_cms_admin_head() {
     
     $j(document).ready(function() {
         switch1();
-        $j('[name=zero_cms_postload]').click(function() {
+        $j('[name=zero_cms_postload]').click(function(event) {
+//		event.stopImmediatePropagation();
+
             $j(this).after($percentspan);
             disableAll();
             doLoad("post", null);
