@@ -33,7 +33,7 @@ Author URI: http://www.kraken.no
 
 global $wp_version, $version;
 
-$version = '0.1';
+$version = '0.2';
 
 $errmsg = __('ZeroCMS for WordPress requires WordPress 3.0 or greater. ',
         'zero_cms4wp');
