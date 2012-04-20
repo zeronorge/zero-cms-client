@@ -433,7 +433,8 @@ function zero_cms_load_all_posts($prev) {
     if (is_multisite() && get_site_option('zero_cms_index_all_sites')) {
         $bloglist = $wpdb->get_col("SELECT * FROM {$wpdb->base_prefix}blogs", 0);
         foreach ($bloglist as $bloginfo) {
-            $postids = $wpdb->get_results("SELECT ID FROM {$wpdb->base_prefix}{$bloginfo->blog_id}_posts WHERE post_status = 'publish' AND post_type = 'post' ORDER BY ID;");
+            $postids = $wpdb->get_results("SELECT ID FROM {$wpdb->base_prefix}{$bloginfo->blog_id}_posts WHERE post_status =
+                    'publish' AND post_type != 'page' ORDER BY ID;");
             $postcount = count($postids);
             for ($idx = 0; $idx < $postcount; $idx++) {
                 
@@ -1328,15 +1329,15 @@ function zero_cms_autocomplete($q, $limit) {
     }
 }
 
-add_action( 'template_redirect', 'zero_cms_template_redirect', 1 );
 add_action( 'publish_post', 'zero_cms_handle_modified' );
 add_action( 'publish_page', 'zero_cms_handle_modified' );
 add_action( 'edit_post', 'zero_cms_handle_status_change' );
 add_action( 'delete_post', 'zero_cms_handle_delete' );
 add_action( 'admin_menu', 'zero_cms_add_pages');
 add_action( 'admin_init', 'zero_cms_options_init');
-add_action( 'widgets_init', 'zero_cms_mlt_widget');
-add_action( 'wp_head', 'zero_cms_autosuggest_head');
+//add_action( 'widgets_init', 'zero_cms_mlt_widget');
+//add_action( 'wp_head', 'zero_cms_autosuggest_head');
+//add_action( 'template_redirect', 'zero_cms_template_redirect', 1 );
 add_action( 'admin_head', 'zero_cms_admin_head');
 
 if (is_multisite()) {
