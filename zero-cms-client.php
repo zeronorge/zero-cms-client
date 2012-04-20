@@ -43,11 +43,13 @@ if (version_compare($wp_version, '3.0', '<')) {
 
 require __DIR__ . "/ZeroCmsClient/Zero/DocStorageClientBundle/Client.php";
 use Zero\DocStorageClientBundle\Client as Client;
-// try to use the pear HTTP_Request2 package:
-include_once("HTTP/Request2.php");
-if (!class_exists("HTTP_Request2")) {
-    include_once(__DIR__ ."/HTTP/Request2.php");    
-}
+
+ini_set(
+    'include_path',
+    __DIR__ .PATH_SEPARATOR.ini_get('include_path')
+);
+
+require_once("HTTP/Request2.php");
 /**
  * Easier than rewriting all ->setField() options.
  */
