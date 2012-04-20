@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="Wordpress zeroCMS client" default="build" basedir=".">
+ <property name="source" value="Zero"/>
+
+ <target name="clean"
+         description="Clean up and create artifact directories">
+  <delete dir="${basedir}/build/"/>
+ </target>
+
+ <target name="build-wordpress">
+ 
+    <mkdir dir="${basedir}/build"/>
+    <zip destfile="${basedir}/build/zero-cms-client.zip">
+         <zipfileset dir="Net" prefix="zero-cms-client/Net"  />
+         <zipfileset dir="HTTP" prefix="zero-cms-client/HTTP"/>
+         <zipfileset dir="ZeroCmsClient" prefix="zero-cms-client/ZeroCmsClient" includes="Zero/**/*.php"/>
+         <zipfileset dir="." includes="*.php" prefix="zero-cms-client"/>
+    </zip>
+
+ </target>
+
+ <target name="build" depends="clean,build-wordpress"/>
+</project>
